@@ -44,7 +44,7 @@ def get_patent_data(patent):
     inv= soup.find_all('dd', attrs={'itemprop':"inventor"})
     #y = len(inv) - 1
     for c in range(len(inv)):
-        inventor.append(inv[c].string.strip())
+        inventor.append(inv[c].string.replace('\n', ' ').strip())
     inventors = " | ".join(inventor)
     #print(inv.text)
 
@@ -53,12 +53,42 @@ def get_patent_data(patent):
 
     current_assignee= soup.find('dd', attrs={'itemprop':"assigneeCurrent"})
     #print(current_assignee.text)
+    
+    NPL = []
+    NPLS = soup.find_all('tr', attrs={'itemprop':"detailedNonPatentLiterature"})
+    for e in range(len(NPLS)):
+        NPL.append(NPLS[e].text.replace('\n', ' ').strip())
+    #print(NPL)
+    #print(len(NPL))
+    npl_cit = " | ". join(NPL)
+    #print(npl_cit)
+    
+    citation = []
+    cit = soup.find_all('tr', attrs={'itemprop':"backwardReferencesOrig"} )
+    for f in range(len(cit)):
+        citation.append(cit[f].text.replace('\n', ' ').strip())
+    #print(citation)
+    #print(len(citation))
+    citations = " | ".join(citation)
+    #print(citations)
 
-    data=[patent, title.string, inventors, assignee.text, current_assignee.text.strip(), prd.text, flgdate.text, pubdate.text, numclaims[x].text, first_claim.text.strip(), legal_events]
+    fcitation = []
+    fcit = soup.find_all('tr', attrs={'itemprop':"forwardReferencesOrig"} )
+    for f in range(len(fcit)):
+        fcitation.append(fcit[f].text.replace('\n', ' ').strip())
+    #print(fcitation)
+    #print(len(fcitation))
+    fcitations = " | ".join(fcitation)
+    #print(fcitations)
+    
+    for publicationNumber in fcitation:
+        print(publicationNumber)
+
+    data=[patent, title.string, inventors, assignee.text, current_assignee.text.strip(), prd.text, flgdate.text, pubdate.text, numclaims[x].text, first_claim.text.strip(), legal_events.replace('\n',' ').strip(), len(NPL), npl_cit, len(citation), citations, len(fcitation), fcitations]
     return data
 
 
-df=pd.DataFrame(index=['Patent Number', 'Title', 'Inventor', 'Assignee', 'Current Assignee', 'Priority Date', 'Application Date', 'Publication Date', 'Number of Claims', 'First CLaim', 'Legal Events'])
+df=pd.DataFrame(index=['Patent Number', 'Title', 'Inventor', 'Assignee', 'Current Assignee', 'Priority Date', 'Application Date', 'Publication Date', 'Number of Claims', 'First CLaim', 'Legal Events', 'Number of NPL Citations', 'NPL Citations', 'Number of Backward Citations', 'Backward Citations', 'Number of Forward Citations', 'Forward Citations'])
 
 
 for a in range(len(patnum)):
